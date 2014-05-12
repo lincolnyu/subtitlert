@@ -7,20 +7,20 @@ using SubtitleRT.Helpers;
 
 namespace SubtitleRT.Models
 {
-    public class RecentFiles : BaseModel
+    public class MainPageModel : BaseModel
     {
         #region Constructors
 
-        public RecentFiles()
+        public MainPageModel()
         {
-            Files = new ObservableCollection<RecentFile>();
+            RecentFiles = new ObservableCollection<RecentFile>();
         }
 
         #endregion
         
         #region Properties
 
-        public ObservableCollection<RecentFile> Files
+        public ObservableCollection<RecentFile> RecentFiles
         {
             get; private set;
         }
@@ -31,8 +31,7 @@ namespace SubtitleRT.Models
 
         public async void UpdateRecentFiles()
         {
-            await StorageHelper.ClearNonLpFilesFromLRU();
-            Files.Clear();
+            RecentFiles.Clear();
             await StorageHelper.VerifyRecentLRU();
             var list = StorageApplicationPermissions.MostRecentlyUsedList;
             var mruEntries = list.Entries;
@@ -45,7 +44,7 @@ namespace SubtitleRT.Models
                     File = file,
                     Token = token
                 };
-                Files.Insert(0, recentFile);
+                RecentFiles.Insert(0, recentFile);
             }
         }
 

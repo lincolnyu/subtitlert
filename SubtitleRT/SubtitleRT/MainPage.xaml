@@ -41,6 +41,5 @@
                 </ListView.ItemsPanel>
             </ListView>
         </Grid>
-        
     </Grid>
 </Page>

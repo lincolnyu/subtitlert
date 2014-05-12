@@ -4,14 +4,14 @@ using SubtitleRT.Models;
 
 namespace SubtitleRT.ViewModels
 {
-    public class RecentFilesViewModel : BaseViewModel<RecentFiles>
+    public class MainPageViewModel : BaseViewModel<MainPageModel>
     {
         #region Constructors
 
-        public RecentFilesViewModel(RecentFiles model) : base(model)
+        public MainPageViewModel(MainPageModel model) : base(model)
         {
             RecentFiles = new ObservableCollection<RecentFileViewModel>();
-            new ListSync(RecentFiles, model.Files, o => new RecentFileViewModel((RecentFile)o));
+            new ListSync(RecentFiles, model.RecentFiles, o => new RecentFileViewModel((RecentFile)o));
         }
 
         #endregion
