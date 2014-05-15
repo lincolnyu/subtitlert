@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using Apollo;
 using SubtitleRT.Models;
 
@@ -10,10 +11,11 @@ namespace SubtitleRT.ViewModels
 
         static RecentFileViewModel()
         {
-            ViewModelInfoRegistry.Instance.ViewModelToInfo[typeof (RecentFileViewModel)] = new ViewModelInfo
+            var info = ViewModelInfoRegistry.Instance.ViewModelToInfo[typeof (RecentFileViewModel)] = new ViewModelInfo
             {
                 AllowTrivialMapping = true
             };
+            info.PropertyMapper["FilePath"] = new HashSet<string> { "FileName", "FileFolder" };
         }
 
         public RecentFileViewModel(RecentFile model)
@@ -38,6 +40,14 @@ namespace SubtitleRT.ViewModels
             get
             {
                 return Path.GetFileName(Model.FilePath);
+            }
+        }
+
+        public string FileFolder
+        {
+            get
+            {
+                return Path.GetDirectoryName(Model.FilePath);
             }
         }
 

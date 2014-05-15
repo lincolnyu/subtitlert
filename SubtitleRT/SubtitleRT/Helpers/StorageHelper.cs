@@ -88,11 +88,6 @@ namespace SubtitleRT.Helpers
             await RemoveFromRecentLRU(f => f.IsTempFile(), true);
         }
 
-        public static async Task ClearNonLpFilesFromLRU()
-        {
-            await RemoveFromRecentLRU(f => !f.IsLinkPadProjectFile());
-        }
-
         public static async Task RemoveFromRecentLRU(RemovePredicate predicate, bool deleteFile = false)
         {
             var list = StorageApplicationPermissions.MostRecentlyUsedList;
@@ -131,12 +126,6 @@ namespace SubtitleRT.Helpers
             var folderPath = folder.Path;
             var filePath = file.Path;
             return filePath.Contains(folderPath);
-        }
-
-        public static bool IsLinkPadProjectFile(this IStorageFile file)
-        {
-            var fileType = file.FileType;
-            return (fileType == ".lnp");
         }
 
         public static void AddToRecent(this IStorageFile file)
