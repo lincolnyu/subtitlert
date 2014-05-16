@@ -7,7 +7,6 @@ using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Apollo;
-using SubtitleRT.Common;
 using SubtitleRT.Helpers;
 
 namespace SubtitleRT.Models
@@ -95,19 +94,17 @@ namespace SubtitleRT.Models
             }
             set
             {
-                if (CurrentIndex != value)
+                // This is done regarless if the index is to change since it alreays leads to the resetting of the play time
+                _requestedIndex = value;
+                if (_requestedIndex >= 0)
                 {
-                    _requestedIndex = value;
-                    if (_requestedIndex >= 0)
+                    if (_isPlaying)
                     {
-                        if (_isPlaying)
-                        {
-                            PlayFromRequestedIndex(_requestedIndex);
-                        }
-                        else
-                        {
-                            CurrentPlayTime = Subtitles[_requestedIndex].StartTime;
-                        }
+                        PlayFromRequestedIndex(_requestedIndex);
+                    }
+                    else
+                    {
+                        CurrentPlayTime = Subtitles[_requestedIndex].StartTime;
                     }
                 }
             }
