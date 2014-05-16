@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using Windows.UI;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media;
 using Apollo;
 using SubtitleRT.Common;
 using SubtitleRT.Models;
@@ -11,7 +13,6 @@ namespace SubtitleRT.ViewModels
     {
         #region Fields
 
-
         #region Navigation related
 
         private readonly NavigationHelper _navigationHelper;
@@ -20,6 +21,10 @@ namespace SubtitleRT.ViewModels
         #endregion
 
         private bool _showTimeSteps;
+
+        private static readonly Color DefaultItemColor = Colors.Black;
+        private static readonly Color HilightedItemColor = Colors.Lime;
+
 
         #endregion
 
@@ -39,9 +44,16 @@ namespace SubtitleRT.ViewModels
             _navigationHelper.LoadState += navigationHelper_LoadState;
             _navigationHelper.SaveState += navigationHelper_SaveState;
 
+            model.CurrentIndexChanged += ModelOnCurrentIndexChanged;
+
             Subtitles = new ObservableCollection<SubtitleItemViewModel>();
 // ReSharper disable once ObjectCreationAsStatement
-            new ListSync(Subtitles, Model.Subtitles, st => new SubtitleItemViewModel((SubtitleItemModel) st, this));
+            new ListSync(Subtitles, Model.Subtitles, st => new SubtitleItemViewModel((SubtitleItemModel) st, this)
+            {
+                ItemColor = new SolidColorBrush(
+                    Model.CurrentIndex>=0 && Model.Subtitles[Model.CurrentIndex] == st ? 
+                    HilightedItemColor : DefaultItemColor)
+            });
         }
 
         #endregion
@@ -155,6 +167,21 @@ namespace SubtitleRT.ViewModels
         private void navigationHelper_SaveState(object sender, SaveStateEventArgs e)
         {
         }
+
+        private void ModelOnCurrentIndexChanged(object sender, int oldIndex, int newIndex)
+        {
+            if (oldIndex >= 0)
+            {
+                var oldItem = Subtitles[oldIndex];
+                oldItem.ItemColor = new SolidColorBrush(DefaultItemColor);
+            }
+            if (newIndex >= 0)
+            {
+                var newItem = Subtitles[newIndex];
+                newItem.ItemColor = new SolidColorBrush(HilightedItemColor);
+            }
+        }
+
 
         #endregion
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using Windows.Storage.Pickers;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
@@ -15,7 +16,13 @@ namespace SubtitleRT
     /// </summary>
     public sealed partial class MainPage
     {
-        private MainPageModel _model;
+        #region Fields
+
+        private readonly MainPageModel _model;
+
+        #endregion
+
+        #region Constructors
 
         public MainPage()
         {
@@ -26,11 +33,23 @@ namespace SubtitleRT
             DataContext = new MainPageViewModel(_model);
         }
 
-        private void RecentList_OnItemClick(object sender, ItemClickEventArgs e)
+        #endregion
+
+        #region Methods
+
+        private async void RecentList_OnItemClick(object sender, ItemClickEventArgs e)
         {
             var item = (RecentFileViewModel) e.ClickedItem;
             var file = item.Model.File;
-            Frame.Navigate(typeof(PlayerPage), file);
+            if (file != null)
+            {
+                Frame.Navigate(typeof(PlayerPage), file);
+            }
+            else
+            {
+                var msg = new MessageDialog("Error loading the specified file.");
+                await msg.ShowAsync();
+            }
         }
 
         private async void BtnLoadFile_OnClick(object sender, RoutedEventArgs e)
@@ -44,7 +63,12 @@ namespace SubtitleRT
             if (file != null)
             {
                 file.AddToRecent();
-                Frame.Navigate(typeof(PlayerPage), file);
+                Frame.Navigate(typeof (PlayerPage), file);
+            }
+            else
+            {
+                var msg = new MessageDialog("Error loading the specified file.");
+                await msg.ShowAsync();
             }
         }
 
@@ -54,5 +78,7 @@ namespace SubtitleRT
 
             _model.UpdateRecentFiles();
         }
+
+        #endregion
     }
 }

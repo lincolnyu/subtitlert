@@ -11,6 +11,7 @@ namespace SubtitleRT.ViewModels
         public MainPageViewModel(MainPageModel model) : base(model)
         {
             RecentFiles = new ObservableCollection<RecentFileViewModel>();
+// ReSharper disable once ObjectCreationAsStatement
             new ListSync(RecentFiles, model.RecentFiles, o => new RecentFileViewModel((RecentFile)o));
         }
 

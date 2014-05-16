@@ -4,8 +4,6 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
-using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
 using Apollo;
 using SubtitleRT.Helpers;
 
@@ -13,11 +11,17 @@ namespace SubtitleRT.Models
 {
     public class PlayerPageModel : BaseModel
     {
+        #region Delegates
+
+        public delegate void CurrentIndexChangedEventHandler(object sender, int oldIndex, int newIndex);
+
+        #endregion
+
         #region Fields
 
         private readonly IStorageFile _file;
 
-        private int _currentIndex;
+        private int _currentIndex = -1;
         private int _requestedIndex;
         
         private bool _isSubtitleOn;
@@ -80,8 +84,13 @@ namespace SubtitleRT.Models
             {
                 if (_currentIndex != value)
                 {
+                    var oldValue = _currentIndex;
                     _currentIndex = value;
                     OnPropertyChanged();
+                    if (CurrentIndexChanged != null)
+                    {
+                        CurrentIndexChanged(this, oldValue, value);
+                    }
                 }
             }
         }
@@ -98,14 +107,19 @@ namespace SubtitleRT.Models
                 _requestedIndex = value;
                 if (_requestedIndex >= 0)
                 {
-                    if (_isPlaying)
+                    if (IsPlaying)
                     {
                         PlayFromRequestedIndex(_requestedIndex);
                     }
                     else
                     {
+                        CurrentIndex = value;
                         CurrentPlayTime = Subtitles[_requestedIndex].StartTime;
                     }
+                }
+                else
+                {
+                    StopToStartPiont();
                 }
             }
         }
@@ -128,12 +142,17 @@ namespace SubtitleRT.Models
 
         #endregion
 
+        #region Events
+
+        public event CurrentIndexChangedEventHandler CurrentIndexChanged;
+
+        #endregion
+
         #region Methods
 
         public async void PlayFromRequestedIndex(int index)
         {
-            StopPlaying();
-            await Task.Delay(TimeSlice);
+            await StopPlaying();
             CurrentPlayTime = Subtitles[_requestedIndex].StartTime;
             await Play();
         }
@@ -147,6 +166,17 @@ namespace SubtitleRT.Models
         public async Task Play()
         {
             await Play(CurrentPlayTime);
+        }
+
+
+        public async void StopToStartPiont()
+        {
+            if (IsPlaying)
+            {
+                await StopPlaying();
+            }
+            CurrentIndex = -1;
+            CurrentPlayTime = TimeSpan.Zero;
         }
 
         public async Task Play(TimeSpan from)
@@ -225,9 +255,13 @@ namespace SubtitleRT.Models
             _isPlaying = false;
         }
 
-        public void StopPlaying()
+        public async Task StopPlaying()
         {
             _stopPlaying = true;
+            while (_isPlaying)
+            {
+                await Task.Delay(TimeSlice);
+            }
         }
 
         private async void ParseFile()
@@ -288,7 +322,7 @@ namespace SubtitleRT.Models
                         Index = index++,
                         StartTime = st,
                         EndTime = et,
-                        Content = sbContent.ToString()
+                        Content = sbContent.ToString(),
                     };
 
                     // trim the last new line characters
