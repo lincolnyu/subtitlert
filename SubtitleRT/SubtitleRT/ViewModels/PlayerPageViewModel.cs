@@ -22,9 +22,8 @@ namespace SubtitleRT.ViewModels
 
         private bool _showTimeSteps;
 
-        private static readonly Color DefaultItemColor = Colors.Black;
-        private static readonly Color HilightedItemColor = Colors.Lime;
-
+        private static readonly Color DefaultItemColor = Colors.Transparent;
+        private static readonly Color HilightedItemColor = Colors.DarkGreen;
 
         #endregion
 

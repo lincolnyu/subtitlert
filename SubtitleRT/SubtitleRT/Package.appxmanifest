@@ -1,38 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest">
-
-  <Identity Name="e767359e-4053-4137-8750-84bd61e79d15"
-            Publisher="CN=quanb_000"
-            Version="1.0.0.0" />
-
+  <Identity Name="62356quanbenSoft.SubtitleRT" Publisher="CN=98D59B96-F0DA-47DE-98FF-E00125CD4177" Version="1.1.0.0" />
   <Properties>
-    <DisplayName>SubtitleRT</DisplayName>
-    <PublisherDisplayName>quanb_000</PublisherDisplayName>
+    <DisplayName>Subtitle RT</DisplayName>
+    <PublisherDisplayName>quanbenSoft</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
-
   <Prerequisites>
     <OSMinVersion>6.3.0</OSMinVersion>
     <OSMaxVersionTested>6.3.0</OSMaxVersionTested>
   </Prerequisites>
-
   <Resources>
-    <Resource Language="x-generate"/>
+    <Resource Language="x-generate" />
   </Resources>
-
   <Applications>
-    <Application Id="App"
-        Executable="$targetnametoken$.exe"
-        EntryPoint="SubtitleRT.App">
-        <m2:VisualElements
-            DisplayName="SubtitleRT"
-            Square150x150Logo="Assets\Logo.png"
-            Square30x30Logo="Assets\SmallLogo.png"
-            Description="SubtitleRT"
-            ForegroundText="light"
-            BackgroundColor="#464646">
-            <m2:SplashScreen Image="Assets\SplashScreen.png" />
-        </m2:VisualElements>
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="SubtitleRT.App">
+      <m2:VisualElements DisplayName="Subtitle RT" Square150x150Logo="Assets\Logo.png" Square30x30Logo="Assets\SmallLogo.png" Description="SubtitleRT" ForegroundText="light" BackgroundColor="#464646">
+        <m2:SplashScreen Image="Assets\SplashScreen.png" />
+      </m2:VisualElements>
     </Application>
   </Applications>
   <Capabilities>

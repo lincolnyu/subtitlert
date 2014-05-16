@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
+﻿#define EMBEDDED_PRIVACY_STATEMENT
+
+using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
+using Windows.UI.ApplicationSettings;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
 // The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=234227
@@ -22,7 +16,7 @@ namespace SubtitleRT
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.
     /// </summary>
-    sealed partial class App : Application
+    sealed partial class App
     {
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -30,8 +24,8 @@ namespace SubtitleRT
         /// </summary>
         public App()
         {
-            this.InitializeComponent();
-            this.Suspending += OnSuspending;
+            InitializeComponent();
+            Suspending += OnSuspending;
         }
 
         /// <summary>
@@ -45,11 +39,11 @@ namespace SubtitleRT
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
             {
-                this.DebugSettings.EnableFrameRateCounter = true;
+                DebugSettings.EnableFrameRateCounter = true;
             }
 #endif
 
-            Frame rootFrame = Window.Current.Content as Frame;
+            var rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
             // just ensure that the window is active
@@ -69,6 +63,8 @@ namespace SubtitleRT
 
                 // Place the frame in the current Window
                 Window.Current.Content = rootFrame;
+
+                InitializeRequirements();
             }
 
             if (rootFrame.Content == null)
@@ -105,5 +101,48 @@ namespace SubtitleRT
             //TODO: Save application state and stop any background activity
             deferral.Complete();
         }
+
+        #region Capabilities
+
+        private void InitializeRequirements()
+        {
+            SettingsPane.GetForCurrentView().CommandsRequested += OnSettingsPaneCommandRequested;
+        }
+
+        private void OnSettingsPaneCommandRequested(SettingsPane sender, SettingsPaneCommandsRequestedEventArgs args)
+        {
+            // Add commands
+            args.Request.ApplicationCommands.Add(new SettingsCommand("privacyID", "Privacy Statement", ShowPrivacyStatement));
+            args.Request.ApplicationCommands.Add(new SettingsCommand("reviewID", "Rate and Review", DoRateAndReview));
+        }
+
+        private void DoRateAndReview(IUICommand command)
+        {
+            RateAndReview();
+        }
+
+        private async void RateAndReview()
+        {
+            // NOTE make sure it's the same as the package family name shown in the Package.appxmanifest
+            await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-windows-store:REVIEW?PFN=62356quanbenSoft.SubtitleRT_kxms4zn09601g"));
+        }
+
+        private
+#if !EMBEDDED_PRIVACY_STATEMENT
+ async
+#endif
+ void ShowPrivacyStatement(IUICommand command)
+        {
+            var uri = new Uri(@"http://members.dodo.com.au/yiweiyu/apps/privacy/subtitle-rt.html");
+#if EMBEDDED_PRIVACY_STATEMENT
+            var privacyFlyout = new PrivacyFlyout();
+            privacyFlyout.LoadWeb(uri);
+            privacyFlyout.ShowIndependent();
+#else
+            await Windows.System.Launcher.LaunchUriAsync(uri);
+#endif
+        }
+
+        #endregion
     }
 }
