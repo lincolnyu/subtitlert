@@ -1,15 +1,17 @@
 ﻿#define EMBEDDED_PRIVACY_STATEMENT
 
 using System;
+using System.Linq;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.Storage;
 using Windows.UI.ApplicationSettings;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
-
 // The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=234227
+using SubtitleRT.Helpers;
 
 namespace SubtitleRT
 {
@@ -35,7 +37,6 @@ namespace SubtitleRT
         /// <param name="e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
-
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
             {
@@ -50,9 +51,11 @@ namespace SubtitleRT
             if (rootFrame == null)
             {
                 // Create a Frame to act as the navigation context and navigate to the first page
-                rootFrame = new Frame();
-                // Set the default language
-                rootFrame.Language = Windows.Globalization.ApplicationLanguages.Languages[0];
+                rootFrame = new Frame
+                {
+                    // Set the default language
+                    Language = Windows.Globalization.ApplicationLanguages.Languages[0]
+                };
 
                 rootFrame.NavigationFailed += OnNavigationFailed;
 
@@ -141,6 +144,46 @@ namespace SubtitleRT
 #else
             await Windows.System.Launcher.LaunchUriAsync(uri);
 #endif
+        }
+
+        protected async override void OnFileActivated(FileActivatedEventArgs args)
+        {
+            base.OnFileActivated(args);
+
+            var file = args.Files.FirstOrDefault() as StorageFile; // only 1 file is supported
+            if (file == null)
+            {
+                return; // an unknown error, not sure what should be the supposed behaviour
+            }
+
+            var rootFrame = Window.Current.Content as Frame;
+
+            // Do not repeat app initialization when the Window already has content,
+            // just ensure that the window is active
+            if (rootFrame == null)
+            {
+                // Create a Frame to act as the navigation context and navigate to the first page
+                rootFrame = new Frame
+                {
+                    // Set the default language
+                    Language = Windows.Globalization.ApplicationLanguages.Languages[0]
+                };
+
+                rootFrame.NavigationFailed += OnNavigationFailed;
+
+                // Place the frame in the current Window
+                Window.Current.Content = rootFrame;
+
+                InitializeRequirements();
+            }
+
+            rootFrame.Navigate(typeof(PlayerPage), file);
+
+            // Ensure the current window is active
+            Window.Current.Activate();
+
+            await StorageHelper.VerifyRecentLRU();
+            file.AddToRecent();
         }
 
         #endregion

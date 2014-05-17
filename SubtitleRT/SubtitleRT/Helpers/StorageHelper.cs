@@ -18,7 +18,7 @@ namespace SubtitleRT.Helpers
         ///  keeps a look up from file name to token
         ///  since storage file LRU is app wide, it's defined as a global variable
         /// </summary>
-        private static Dictionary<string, string> _fileNameToToken;
+        private static Dictionary<string, string> _fileNameToToken = new Dictionary<string, string>();
 
         #endregion
 
@@ -51,7 +51,7 @@ namespace SubtitleRT.Helpers
         /// </returns>
         public static async Task VerifyRecentLRU()
         {
-            _fileNameToToken = new Dictionary<string, string>();
+            _fileNameToToken.Clear();
             var list = StorageApplicationPermissions.MostRecentlyUsedList;
             var tokensToRemove = new List<string>();
 

@@ -3,7 +3,6 @@ using Windows.Storage.Pickers;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-// The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 using Windows.UI.Xaml.Navigation;
 using SubtitleRT.Helpers;
 using SubtitleRT.Models;
@@ -43,6 +42,7 @@ namespace SubtitleRT
             var file = item.Model.File;
             if (file != null)
             {
+                file.AddToRecent();
                 Frame.Navigate(typeof(PlayerPage), file);
             }
             else
