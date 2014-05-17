@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using Windows.UI;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
@@ -22,8 +23,9 @@ namespace SubtitleRT.ViewModels
 
         private bool _showTimeSteps;
 
-        private static readonly Color DefaultItemColor = Colors.Transparent;
-        private static readonly Color HilightedItemColor = Colors.DarkGreen;
+        private static readonly Color UnplayedItemColor = Colors.Transparent;
+        private static readonly Color HilightedItemColor = Colors.Green;
+        private static readonly Color InactiveItemColor = Colors.DarkOliveGreen;
 
         #endregion
 
@@ -51,7 +53,7 @@ namespace SubtitleRT.ViewModels
             {
                 ItemColor = new SolidColorBrush(
                     Model.CurrentIndex>=0 && Model.Subtitles[Model.CurrentIndex] == st ? 
-                    HilightedItemColor : DefaultItemColor)
+                    HilightedItemColor : UnplayedItemColor)
             });
         }
 
@@ -172,12 +174,29 @@ namespace SubtitleRT.ViewModels
             if (oldIndex >= 0)
             {
                 var oldItem = Subtitles[oldIndex];
-                oldItem.ItemColor = new SolidColorBrush(DefaultItemColor);
+                oldItem.ItemColor = new SolidColorBrush(UnplayedItemColor);
             }
             if (newIndex >= 0)
             {
                 var newItem = Subtitles[newIndex];
-                newItem.ItemColor = new SolidColorBrush(HilightedItemColor);
+                newItem.ItemColor = Model.IsSubtitleOn
+                        ? new SolidColorBrush(HilightedItemColor)
+                        : new SolidColorBrush(InactiveItemColor);
+            }
+        }
+
+
+        protected override void ModelOnPropertyChanged(object sender, PropertyChangedEventArgs args)
+        {
+            base.ModelOnPropertyChanged(sender, args);
+
+            switch (args.PropertyName)
+            {
+                case "IsSubtitleOn":
+                    Subtitles[CurrentIndex].ItemColor = Model.IsSubtitleOn 
+                        ? new SolidColorBrush(HilightedItemColor)
+                        : new SolidColorBrush(InactiveItemColor);
+                    break;
             }
         }
 

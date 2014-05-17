@@ -47,7 +47,7 @@ namespace SubtitleRT
             }
             else
             {
-                var msg = new MessageDialog("Error loading the specified file.");
+                var msg = new MessageDialog("Error loading the specified recent file which may no longer exist.");
                 await msg.ShowAsync();
             }
         }
@@ -65,11 +65,7 @@ namespace SubtitleRT
                 file.AddToRecent();
                 Frame.Navigate(typeof (PlayerPage), file);
             }
-            else
-            {
-                var msg = new MessageDialog("Error loading the specified file.");
-                await msg.ShowAsync();
-            }
+            // if it's null it's very likely cancelled by the user
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)

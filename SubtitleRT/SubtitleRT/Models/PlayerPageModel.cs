@@ -198,7 +198,7 @@ namespace SubtitleRT.Models
                 }
             }
 
-            for (; index < Subtitles.Count; index++)
+            for (; index < Subtitles.Count && !_stopPlaying; index++)
             {
                 var subtitle = Subtitles[index];
 
@@ -219,8 +219,7 @@ namespace SubtitleRT.Models
                     }
                     if (_stopPlaying)
                     {
-                        _isPlaying = false;
-                        return;
+                        break;
                     }
                 }
                
@@ -244,13 +243,13 @@ namespace SubtitleRT.Models
                     }
                     if (_stopPlaying)
                     {
-                        _isPlaying = false;
-                        return;
+                        break;
                     }
                 }
-
                 IsSubtitleOn = false;
             }
+
+            IsSubtitleOn = false;
             CurrentIndex = -1;
             _isPlaying = false;
         }
