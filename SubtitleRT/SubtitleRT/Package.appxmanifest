@@ -21,10 +21,19 @@
       <Extensions>
         <Extension Category="windows.fileTypeAssociation">
           <FileTypeAssociation Name="srt">
-            <DisplayName>SRT Subtitle Format</DisplayName>
-            <InfoTip>Subtitle file in SRT format and with .srt file extension</InfoTip>
+            <DisplayName>Subtitle File in SRT format</DisplayName>
+            <InfoTip>Subtitle file in SRT format with .srt extension</InfoTip>
             <SupportedFileTypes>
               <FileType>.srt</FileType>
+            </SupportedFileTypes>
+          </FileTypeAssociation>
+        </Extension>
+        <Extension Category="windows.fileTypeAssociation">
+          <FileTypeAssociation Name="sub">
+            <DisplayName>Subtitle File in SUB format</DisplayName>
+            <InfoTip>Subtitle file in SUB format with .sub extension</InfoTip>
+            <SupportedFileTypes>
+              <FileType>.sub</FileType>
             </SupportedFileTypes>
           </FileTypeAssociation>
         </Extension>

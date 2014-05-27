@@ -59,6 +59,7 @@ namespace SubtitleRT
                 SuggestedStartLocation = PickerLocationId.DocumentsLibrary
             };
             filePicker.FileTypeFilter.Add(".srt");
+            filePicker.FileTypeFilter.Add(".sub");
             var file = await filePicker.PickSingleFileAsync();
             if (file != null)
             {

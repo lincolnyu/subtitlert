@@ -265,6 +265,106 @@ namespace SubtitleRT.Models
 
         private async void ParseFile()
         {
+            
+            var ext = Path.GetExtension(_file.Name).ToLower();
+            if (ext == ".sub")
+            {
+                await ParseFileSub();
+            }
+            else
+            {
+                // all others are treated as SRT 
+                await ParseFileSrt();
+            }
+        }
+
+        private async Task ParseFileSub()
+        {
+            Subtitles.Clear();
+            var text = await FileIO.ReadTextAsync(_file);
+            var index = 0;
+            var firstLineRead = false;
+            var ratio = 0.0;
+            using (var sr = new StringReader(text))
+            {
+                while (true)
+                {
+                    var line = sr.ReadLine();
+                    if (line == null) break;
+
+                    if (line.Length < 1 || line[0] != '{') continue;
+
+                    var delim1 = line.IndexOf("}{", StringComparison.Ordinal);
+                    if (delim1 < 0) continue;
+
+                    var snum1 = line.Substring(1, delim1 - 1);
+
+                    var delim2 = line.IndexOf("}", delim1+2, StringComparison.Ordinal);
+                    if (delim2 < 0) continue;
+
+                    var snum2 = line.Substring(delim1 + 2, delim2 - delim1 - 2);
+
+                    int inum1, inum2;
+                    if (!int.TryParse(snum1, out inum1))
+                    {
+                        continue;
+                    }
+
+                    if (!int.TryParse(snum1, out inum1))
+                    {
+                        continue;
+                    }
+
+                    if (!int.TryParse(snum2, out inum2))
+                    {
+                        continue;
+                    }
+
+                    var stext = line.Substring(delim2 + 1);
+
+                    if (!firstLineRead)
+                    {
+                        // inum1 and inum2 are supposed to be 1s
+
+                        if (!double.TryParse(stext, out ratio) || ratio <= 0)
+                        {
+                            break;
+                        }
+
+                        firstLineRead = true;
+                        continue;
+                    }
+
+                    var msecStart = inum1*1000/ratio;
+                    var startTime = TimeSpan.FromMilliseconds(msecStart);
+                    var msecEnd = inum2*1000/ratio;
+                    var endTime = TimeSpan.FromMilliseconds(msecEnd);
+
+                    var textSegs = stext.Split('|');
+                    var sbContent = new StringBuilder();
+                    foreach (var seg in textSegs)
+                    {
+                        sbContent.AppendLine(seg);
+                    }
+
+                    var item = new SubtitleItemModel
+                    {
+                        Index = index++,
+                        StartTime = startTime,
+                        EndTime = endTime,
+                        Content = sbContent.ToString(),
+                    };
+
+                    // trim the last new line characters
+                    item.Content = item.Content.TrimEnd('\r', '\n');
+
+                    Subtitles.Add(item);
+                }
+            }
+        }
+
+        private async Task ParseFileSrt()
+        {
             Subtitles.Clear();
             var text = await FileIO.ReadTextAsync(_file);
             var index = 0;
