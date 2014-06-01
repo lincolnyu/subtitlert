@@ -14,11 +14,15 @@ namespace SubtitleRT.Helpers
 
         public delegate bool RemovePredicate(StorageFile f);
 
+        #endregion
+
+        #region Fields
+
         /// <summary>
         ///  keeps a look up from file name to token
         ///  since storage file LRU is app wide, it's defined as a global variable
         /// </summary>
-        private static Dictionary<string, string> _fileNameToToken = new Dictionary<string, string>();
+        public static readonly Dictionary<string, string> FileNameToToken = new Dictionary<string, string>();
 
         #endregion
 
@@ -51,7 +55,7 @@ namespace SubtitleRT.Helpers
         /// </returns>
         public static async Task VerifyRecentLRU()
         {
-            _fileNameToToken.Clear();
+            FileNameToToken.Clear();
             var list = StorageApplicationPermissions.MostRecentlyUsedList;
             var tokensToRemove = new List<string>();
 
@@ -60,13 +64,13 @@ namespace SubtitleRT.Helpers
                 try
                 {
                     var f = await list.GetFileAsync(item.Token);
-                    if (_fileNameToToken.ContainsKey(f.Path))
+                    if (FileNameToToken.ContainsKey(f.Path))
                     {
                         tokensToRemove.Add(item.Token);
                     }
                     else
                     {
-                        _fileNameToToken[f.Path] = item.Token;
+                        FileNameToToken[f.Path] = item.Token;
                     }
                 }
                 catch (Exception)
@@ -132,7 +136,7 @@ namespace SubtitleRT.Helpers
         {
             var list = StorageApplicationPermissions.MostRecentlyUsedList;
             string token;
-            if (_fileNameToToken.TryGetValue(file.Name, out token))
+            if (FileNameToToken.TryGetValue(file.Name, out token))
             {
                 list.Remove(token);
             }

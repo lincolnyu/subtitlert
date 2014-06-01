@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Windows.UI;
@@ -27,6 +28,9 @@ namespace SubtitleRT.ViewModels
         private static readonly Color HilightedItemColor = Colors.Green;
         private static readonly Color InactiveItemColor = Colors.DarkOliveGreen;
 
+
+        private string _selectedEncoding;
+
         #endregion
 
         #region Constructors
@@ -52,9 +56,11 @@ namespace SubtitleRT.ViewModels
             new ListSync(Subtitles, Model.Subtitles, st => new SubtitleItemViewModel((SubtitleItemModel) st, this)
             {
                 ItemColor = new SolidColorBrush(
-                    Model.CurrentIndex>=0 && Model.Subtitles[Model.CurrentIndex] == st ? 
+                    Model.CurrentIndex>=0 && Model.CurrentIndex<Model.Subtitles.Count && Model.Subtitles[Model.CurrentIndex] == st ? 
                     HilightedItemColor : UnplayedItemColor)
             });
+
+            PopulateSupportedEncodings();
         }
 
         #endregion
@@ -135,12 +141,33 @@ namespace SubtitleRT.ViewModels
             }
         }
 
+        public List<string> SupportedEncodings
+        {
+            get; private set;
+        }
+
+        public string SelectedEncoding
+        {
+            get
+            {
+                return _selectedEncoding;
+            }
+            set
+            {
+                if (_selectedEncoding != value)
+                {
+                    _selectedEncoding = value;
+                    UpdateEncodingToModel();
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         #endregion
 
         #region Methods
 
         #region Navigation related
-
 
         /// <summary>
         /// Populates the page with content passed during navigation. Any saved state is also
@@ -185,7 +212,6 @@ namespace SubtitleRT.ViewModels
             }
         }
 
-
         protected override void ModelOnPropertyChanged(object sender, PropertyChangedEventArgs args)
         {
             base.ModelOnPropertyChanged(sender, args);
@@ -197,11 +223,58 @@ namespace SubtitleRT.ViewModels
                         ? new SolidColorBrush(HilightedItemColor)
                         : new SolidColorBrush(InactiveItemColor);
                     break;
+                case "EncodingName":
+                {
+                    var en = Model.EncodingName;
+                    if (en == null)
+                    {
+                        SelectedEncoding = SupportedEncodings[0];
+                    }
+                    else
+                    {
+                        foreach (var encoding in SupportedEncodings)
+                        {
+                            if (encoding == en)
+                            {
+                                SelectedEncoding = encoding;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                }
             }
         }
 
-
         #endregion
+
+        private async void UpdateEncodingToModel()
+        {
+            if (SelectedEncoding == SupportedEncodings[0])
+            {
+                Model.EncodingName = null;
+            }
+            else
+            {
+                Model.EncodingName = SelectedEncoding;
+            }
+            await Model.ParseFile(); //update the display
+        }
+
+        private void PopulateSupportedEncodings()
+        {
+            SupportedEncodings = new List<string>
+            {
+                "None (Unicode)",
+                "Big5",
+                "EUC-KR",
+                "GB2312",
+                "Shift-JIS",
+                "Windows-1250",
+                "Windows-1252"
+            };
+            SelectedEncoding = SupportedEncodings[0];
+        }
 
         #endregion
     }

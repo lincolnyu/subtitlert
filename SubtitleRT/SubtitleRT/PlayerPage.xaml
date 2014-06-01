@@ -22,15 +22,21 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="120"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="280"/>
+                    <ColumnDefinition Width="280"/>
                 </Grid.ColumnDefinitions>
                 <Button Name="BtnHome" Margin="39,0,0,10" Click="BtnHome_OnClick"
                         Style="{StaticResource NavigationBackButtonNormalStyle}"
                         VerticalAlignment="Bottom"
                         AutomationProperties.Name="Home"
                         AutomationProperties.AutomationId="HomeButton"
-                        AutomationProperties.ItemType="Navigation Button"/>
-                <TextBlock Text="{StaticResource AppName}" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="1" 
+                        AutomationProperties.ItemType="Navigation Button" TabIndex="2"/>
+                <TextBlock Text="{StaticResource AppName}" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="0" 
                         IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Bottom" Margin="0,0,0,10"/>
+                <ComboBox Name="Encodings" Grid.Column="2" Width="220" VerticalAlignment="Center" HorizontalAlignment="Center" ItemsSource="{Binding SupportedEncodings}"
+                          SelectedItem="{Binding SelectedEncoding, Mode=TwoWay}" TabIndex="1"/>
+                <SearchBox Name="MainSearch" Grid.Column="3" Width="220" VerticalAlignment="Center" HorizontalAlignment="Center" PlaceholderText="Text to search"
+                           QuerySubmitted="MainSearch_OnQuerySubmitted" TabIndex="2"/>
             </Grid>
         </AppBar>
     </Page.TopAppBar>
@@ -73,7 +79,8 @@
                             <TextBlock Text="to" Margin="10,0,10,0"/>
                             <TextBlock Text="{Binding EndTime, Converter={StaticResource TimeSpanToStringConverter}}"/>
                         </StackPanel>
-                        <TextBlock Text="{Binding Content}" TextWrapping="WrapWholeWords" Margin="8"  FontSize="28"/>
+                        <ContentControl Content="{Binding RichContent}"/>
+                        <!--<TextBlock Text="{Binding Content}" TextWrapping="WrapWholeWords" Margin="8"  FontSize="28"/>-->
                     </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>

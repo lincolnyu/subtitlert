@@ -15,6 +15,8 @@ namespace SubtitleRT.Models
 
         private string _content;
 
+        private object _richContent;
+
         #endregion
 
         #region Properties
@@ -67,7 +69,7 @@ namespace SubtitleRT.Models
             }
         }
 
-        public String Content
+        public string Content
         {
             get
             {
@@ -78,6 +80,22 @@ namespace SubtitleRT.Models
                 if (!Equals(_content, value))
                 {
                     _content = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public object RichContent
+        {
+            get
+            {
+                return _richContent;
+            }
+            set
+            {
+                if (!Equals(_richContent, value))
+                {
+                    _richContent = value;
                     OnPropertyChanged();
                 }
             }

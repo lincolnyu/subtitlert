@@ -69,6 +69,14 @@ namespace SubtitleRT.ViewModels
             }
         }
 
+        public object RichContent
+        {
+            get
+            {
+                return Model.RichContent;
+            }
+        }
+
         public Visibility ExtraInfoVisibility
         {
             get

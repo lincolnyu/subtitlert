@@ -1,9 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
+using Windows.UI.Popups;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Documents;
 using Apollo;
 using SubtitleRT.Helpers;
 
@@ -33,6 +39,10 @@ namespace SubtitleRT.Models
 
         private static readonly TimeSpan TimeSlice = TimeSpan.FromMilliseconds(50);
 
+        private string _encodingName;
+
+        private bool _parsing;
+
         #endregion
 
         #region Constructors
@@ -41,7 +51,6 @@ namespace SubtitleRT.Models
         {
             _file = file;
             Subtitles = new ObservableCollection<SubtitleItemModel>();
-            ParseFile();
         }
 
         #endregion
@@ -135,6 +144,22 @@ namespace SubtitleRT.Models
                 if (_isSubtitleOn != value)
                 {
                     _isSubtitleOn = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string EncodingName
+        {
+            get
+            {
+                return _encodingName;
+            }
+            set
+            {
+                if (_encodingName != value)
+                {
+                    _encodingName = value;
                     OnPropertyChanged();
                 }
             }
@@ -263,9 +288,13 @@ namespace SubtitleRT.Models
             }
         }
 
-        private async void ParseFile()
+        public async Task ParseFile()
         {
-            
+            if (_parsing)
+            {
+                return;
+            }
+            _parsing = true;
             var ext = Path.GetExtension(_file.Name).ToLower();
             if (ext == ".sub")
             {
@@ -276,12 +305,53 @@ namespace SubtitleRT.Models
                 // all others are treated as SRT 
                 await ParseFileSrt();
             }
+            _parsing = false;
+        }
+
+        private async Task<string> GetFileContent()
+        {
+            string text = null;
+            try
+            {
+                if (EncodingName == null)
+                {
+                    text = await FileIO.ReadTextAsync(_file);
+                }
+            }
+            catch (Exception)
+            {
+                text = null;
+            }
+
+            if (text == null)
+            {
+                if (EncodingName == null)
+                {
+                    var md = new MessageDialog("This is not a Unicode subtitle file, encoding needs to be specified. 'Windows-1258' is used for now. You can change it on the page later.");
+                    await md.ShowAsync();
+                    EncodingName = "Windows-1258";
+                }
+                var enc = Encoding.GetEncoding(EncodingName);
+                var buffer = await FileIO.ReadBufferAsync(_file);
+                var bytes = buffer.ToArray();
+                var dec = enc.GetDecoder();
+                var charCount = dec.GetCharCount(bytes, 0, bytes.Length);
+                var chars = new char[charCount];
+                dec.GetChars(bytes, 0, bytes.Length, chars, 0);
+                var sbText = new StringBuilder();
+                foreach (var ch in chars)
+                {
+                    sbText.Append(ch);
+                }
+                text = sbText.ToString();
+            }
+            return text;
         }
 
         private async Task ParseFileSub()
         {
             Subtitles.Clear();
-            var text = await FileIO.ReadTextAsync(_file);
+            var text = await GetFileContent();
             var index = 0;
             var firstLineRead = false;
             var ratio = 0.0;
@@ -340,19 +410,17 @@ namespace SubtitleRT.Models
                     var msecEnd = inum2*1000/ratio;
                     var endTime = TimeSpan.FromMilliseconds(msecEnd);
 
-                    var textSegs = stext.Split('|');
-                    var sbContent = new StringBuilder();
-                    foreach (var seg in textSegs)
-                    {
-                        sbContent.AppendLine(seg);
-                    }
+                    string plainContent;
+                    object richContent;
+                    ParseSubContent(stext, out plainContent, out richContent);
 
                     var item = new SubtitleItemModel
                     {
                         Index = index++,
                         StartTime = startTime,
                         EndTime = endTime,
-                        Content = sbContent.ToString(),
+                        Content = plainContent,
+                        RichContent = richContent
                     };
 
                     // trim the last new line characters
@@ -366,7 +434,7 @@ namespace SubtitleRT.Models
         private async Task ParseFileSrt()
         {
             Subtitles.Clear();
-            var text = await FileIO.ReadTextAsync(_file);
+            var text = await GetFileContent();
             var index = 0;
             using (var sr = new StringReader(text))
             {
@@ -404,32 +472,246 @@ namespace SubtitleRT.Models
                         break;
                     }
 
-                    var sbContent = new StringBuilder();
-                    // contents
-                    while (true)
-                    {
-                        var contentLine = sr.ReadLine();
-                        if (string.IsNullOrWhiteSpace(contentLine))
-                        {
-                            break;
-                        }
-                        sbContent.AppendLine(contentLine);
-                    }
+                    string plainContent;
+                    object richContent;
+                    ParseSrtContent(sr, out plainContent, out richContent);
 
                     var item = new SubtitleItemModel
                     {
                         Index = index++,
                         StartTime = st,
                         EndTime = et,
-                        Content = sbContent.ToString(),
+                        Content = plainContent,
+                        RichContent = richContent
                     };
-
-                    // trim the last new line characters
-                    item.Content = item.Content.TrimEnd('\r', '\n');
 
                     Subtitles.Add(item);
                 }
             }
+        }
+
+        private void ParseSubContent(string stext, out string plainContent, out object richContent)
+        {
+            var textSegs = stext.Split('|');
+            var sbContent = new StringBuilder();
+            foreach (var seg in textSegs)
+            {
+                sbContent.AppendLine(seg);
+            }
+            plainContent = sbContent.ToString();
+            //<TextBlock Text="{Binding Content}" TextWrapping="WrapWholeWords" Margin="8"  FontSize="28"/>
+            richContent = new TextBlock
+            {
+                Text = plainContent,
+                TextWrapping = TextWrapping.WrapWholeWords,
+                Margin = new Thickness(8),
+                FontSize = 28
+            };
+        }
+
+        private void ParseSrtContent(StringReader sr, out string plainContent, out object richContent)
+        {
+            var sbContent = new StringBuilder();
+            var lines = new List<string>();
+            // contents
+            while (true)
+            {
+                var contentLine = sr.ReadLine();
+                if (string.IsNullOrWhiteSpace(contentLine))
+                {
+                    break;
+                }
+
+                sbContent.AppendLine(contentLine);
+                lines.Add(contentLine);
+            }
+            plainContent = sbContent.ToString();
+            // trim the last new line characters
+
+            plainContent = plainContent.TrimEnd('\r', '\n');
+
+            var needProcess = plainContent.Contains("<i>") || plainContent.Contains("<b>");
+            plainContent = plainContent.Replace("</i>", "");
+            plainContent = plainContent.Replace("</b>", "");
+            if (needProcess)
+            {
+                plainContent = plainContent.Replace("<i>", "");
+                plainContent = plainContent.Replace("<b>", "");
+
+                var bold = false;
+                var italic = false;
+                var rtb = new RichTextBlock
+                {
+                    TextWrapping = TextWrapping.WrapWholeWords,
+                    Margin = new Thickness(8),
+                    FontSize = 28
+                };
+                var p = new Paragraph();
+                rtb.Blocks.Add(p);
+                foreach (var line in lines)
+                {
+                    var index = 0;
+                    while (index < line.Length)
+                    {
+                        var lastIndex = index;
+                        index = line.IndexOf('<', index);
+
+                        // TODO further optimize...
+                        if (index < 0)
+                        {
+                            ProcessSrtTo(p, line.Substring(lastIndex, line.Length - lastIndex), bold, italic);
+                            index = line.Length;
+                        }
+                        else if (line.Substring(index).StartsWith("<i>"))
+                        {
+                            ProcessSrtTo(p, line.Substring(lastIndex, index - lastIndex), bold, italic);
+                            italic = true;
+                            index += 3;
+                        }
+                        else if (line.Substring(index).StartsWith("</i>"))
+                        {
+                            ProcessSrtTo(p, line.Substring(lastIndex, index - lastIndex), bold, italic);
+                            italic = false;
+                            index += 4;
+                        }
+                        else if (line.Substring(index).StartsWith("<b>"))
+                        {
+                            ProcessSrtTo(p, line.Substring(lastIndex, index - lastIndex), bold, italic);
+                            bold = true;
+                            index += 3;
+                        }
+                        else if (line.Substring(index).StartsWith("</b>"))
+                        {
+                            ProcessSrtTo(p, line.Substring(lastIndex, index - lastIndex), bold, italic);
+                            bold = false;
+                            index += 4;
+                        }
+                    }
+                }
+                richContent = rtb;
+            }
+            else
+            {
+                richContent = new TextBlock
+                {
+                    Text = plainContent,
+                    TextWrapping = TextWrapping.WrapWholeWords,
+                    Margin = new Thickness(8),
+                    FontSize = 28
+                };
+            }
+        }
+
+        private void ProcessSrtTo(Paragraph p, string str, bool bold, bool italic)
+        {
+            if (str == "")
+            {
+                return;
+            }
+
+            Span firstSpan = null;
+            Span lastSpan = null;
+            if (bold)
+            {
+                var b = new Bold();
+                firstSpan = b;
+                lastSpan = b;
+            }
+            if (italic)
+            {
+                var i = new Italic();
+                if (firstSpan == null)
+                {
+                    firstSpan = i;
+                }
+                if (lastSpan != null)
+                {
+                    lastSpan.Inlines.Add(i);
+                }
+                lastSpan = i;
+            }
+
+            var run = new Run
+            {
+                Text = str
+            };
+            if (lastSpan != null)
+            {
+                p.Inlines.Add(firstSpan);
+                lastSpan.Inlines.Add(run);
+            }
+            else
+            {
+                p.Inlines.Add(run);
+            }
+        }
+
+        public int Search(string query, int startIndex)
+        {
+            var queryLc = query.ToLower();
+            for (var i = startIndex; i < Subtitles.Count; i++)
+            {
+                var subtitle = Subtitles[i];
+                if (string.IsNullOrWhiteSpace(subtitle.Content))
+                {
+                    continue;
+                }
+                var contentLc = subtitle.Content.ToLower();
+                if (Match(contentLc, queryLc))
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        private static bool Match(string source, string query)
+        {
+            var trimmedQuery = query.Trim();
+            var isWord = true;
+            foreach (var c in trimmedQuery)
+            {
+                if (char.IsWhiteSpace(c))
+                {
+                    isWord = false;
+                }
+            }
+
+            if (!isWord)
+            {
+                return source.Contains(query);
+            }
+
+            var index = 0;
+            while (index + trimmedQuery.Length <= source.Length)
+            {
+                index = source.IndexOf(trimmedQuery, index, StringComparison.Ordinal);
+                if (index < 0)
+                {
+                    break;
+                }
+                // make sure the characters before and after are whitespaces
+                if (index > 0)
+                {
+                    var charBefore = source[index - 1];
+                    if (!char.IsWhiteSpace(charBefore))
+                    {
+                        index += trimmedQuery.Length;
+                        continue;
+                    }
+                }
+                if (index + trimmedQuery.Length < source.Length)
+                {
+                    var charAfter = source[index + trimmedQuery.Length];
+                    if (!char.IsWhiteSpace(charAfter))
+                    {
+                        index += trimmedQuery.Length;
+                        continue;
+                    }
+                }
+                return true;
+            }
+            return false;
         }
 
         #endregion
