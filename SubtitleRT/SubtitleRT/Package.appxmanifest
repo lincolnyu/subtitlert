@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest">
-  <Identity Name="62356quanbenSoft.SubtitleRT" Publisher="CN=98D59B96-F0DA-47DE-98FF-E00125CD4177" Version="1.1.0.2" />
+  <Identity Name="62356quanbenSoft.SubtitleRT" Publisher="CN=98D59B96-F0DA-47DE-98FF-E00125CD4177" Version="1.1.0.8" />
   <Properties>
     <DisplayName>Subtitle RT</DisplayName>
     <PublisherDisplayName>quanbenSoft</PublisherDisplayName>
