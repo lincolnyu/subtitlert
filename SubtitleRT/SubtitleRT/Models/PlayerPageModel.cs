@@ -327,9 +327,9 @@ namespace SubtitleRT.Models
             {
                 if (EncodingName == null)
                 {
-                    var md = new MessageDialog("This is not a Unicode subtitle file, encoding needs to be specified. 'Windows-1258' is used for now. You can change it on the page later.");
+                    var md = new MessageDialog("This is not a Unicode subtitle file, encoding needs to be specified. 'Windows-1252' is used for now. You can change it on the page later.");
                     await md.ShowAsync();
-                    EncodingName = "Windows-1258";
+                    EncodingName = "Windows-1252";
                 }
                 var enc = Encoding.GetEncoding(EncodingName);
                 var buffer = await FileIO.ReadBufferAsync(_file);

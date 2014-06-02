@@ -25,13 +25,13 @@
                     <ColumnDefinition Width="280"/>
                     <ColumnDefinition Width="280"/>
                 </Grid.ColumnDefinitions>
-                <Button Name="BtnHome" Margin="39,0,0,10" Click="BtnHome_OnClick"
+                <Button Name="BtnHome" Margin="39,0,0,10" Click="BtnHome_OnClick" Grid.Column="0"
                         Style="{StaticResource NavigationBackButtonNormalStyle}"
                         VerticalAlignment="Bottom"
                         AutomationProperties.Name="Home"
                         AutomationProperties.AutomationId="HomeButton"
                         AutomationProperties.ItemType="Navigation Button" TabIndex="2"/>
-                <TextBlock Text="{StaticResource AppName}" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="0" 
+                <TextBlock Text="{StaticResource AppName}" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="1" 
                         IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Bottom" Margin="0,0,0,10"/>
                 <ComboBox Name="Encodings" Grid.Column="2" Width="220" VerticalAlignment="Center" HorizontalAlignment="Center" ItemsSource="{Binding SupportedEncodings}"
                           SelectedItem="{Binding SelectedEncoding, Mode=TwoWay}" TabIndex="1"/>
