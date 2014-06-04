@@ -423,9 +423,6 @@ namespace SubtitleRT.Models
                         RichContent = richContent
                     };
 
-                    // trim the last new line characters
-                    item.Content = item.Content.TrimEnd('\r', '\n');
-
                     Subtitles.Add(item);
                 }
             }
@@ -499,6 +496,9 @@ namespace SubtitleRT.Models
                 sbContent.AppendLine(seg);
             }
             plainContent = sbContent.ToString();
+            // trim the last new line characters
+            plainContent = plainContent.TrimEnd('\r', '\n');
+
             //<TextBlock Text="{Binding Content}" TextWrapping="WrapWholeWords" Margin="8"  FontSize="28"/>
             richContent = new TextBlock
             {
