@@ -1,8 +1,10 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using Windows.Storage;
 using Windows.System;
 using Windows.UI.Core;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -142,7 +144,7 @@ namespace SubtitleRT
             }
         }
 
-        private void MainSearch_OnQuerySubmitted(SearchBox sender, SearchBoxQuerySubmittedEventArgs args)
+        private async void MainSearch_OnQuerySubmitted(SearchBox sender, SearchBoxQuerySubmittedEventArgs args)
         {
             var text = args.QueryText;
             var startIndex = _model.CurrentIndex + 1;
@@ -152,6 +154,11 @@ namespace SubtitleRT
             {
                 _model.CurrentIndex = target; //NOTE this wouldn't affect the play
                 UpdateScrollView(target);
+            }
+            else
+            {
+                var msg = new MessageDialog("Text not found or invalid query");
+                await msg.ShowAsync();
             }
         }
 
