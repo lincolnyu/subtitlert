@@ -124,7 +124,6 @@
     <Compile Include="Models\PlayerPageModel.cs" />
     <Compile Include="Models\RecentFile.cs" />
     <Compile Include="Models\MainPageModel.cs" />
-    <Compile Include="Models\SubtitleItemModel.cs" />
     <Compile Include="PlayerPage.xaml.cs">
       <DependentUpon>PlayerPage.xaml</DependentUpon>
     </Compile>
@@ -177,6 +176,10 @@
     <ProjectReference Include="..\..\..\..\Apollo\Apollo.git\Apollo\Apollo\Apollo.csproj">
       <Project>{cc9796ba-0eb3-47dc-b293-8a3089893eaf}</Project>
       <Name>Apollo</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\SubtitleCutter\SubtitleCutter.git\SubtitleCutter\SubtitleAnalyzer\SubtitleAnalyzer.csproj">
+      <Project>{e0a68920-b155-46bf-9762-91e67295efdf}</Project>
+      <Name>SubtitleAnalyzer</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">

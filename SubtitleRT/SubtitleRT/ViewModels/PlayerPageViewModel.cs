@@ -6,6 +6,7 @@ using Windows.UI;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using Apollo;
+using SubtitleAnalyzer.Models;
 using SubtitleRT.Common;
 using SubtitleRT.Models;
 

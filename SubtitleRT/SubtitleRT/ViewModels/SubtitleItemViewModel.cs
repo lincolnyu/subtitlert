@@ -2,7 +2,7 @@
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Media;
 using Apollo;
-using SubtitleRT.Models;
+using SubtitleAnalyzer.Models;
 
 namespace SubtitleRT.ViewModels
 {

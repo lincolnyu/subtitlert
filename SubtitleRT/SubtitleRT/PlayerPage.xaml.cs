@@ -150,7 +150,7 @@ namespace SubtitleRT
             var target = _model.Search(text, startIndex);
             if (target >= 0)
             {
-                _model.CurrentIndex = target;
+                _model.CurrentIndex = target; //NOTE this wouldn't affect the play
                 UpdateScrollView(target);
             }
         }
